@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosClient";
+import DashboardLayout from "../components/DashboardLayout";
 
 function AdminDashboard() {
   const [bins, setBins] = useState([]);
@@ -36,7 +37,7 @@ function AdminDashboard() {
   ).length;
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h1>لوحة التحكم (Admin)</h1>
 
       <div
@@ -79,7 +80,7 @@ function AdminDashboard() {
         </button>
         {/* لاحقًا: إدارة المستخدمين مثلاً */}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 

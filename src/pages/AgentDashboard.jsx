@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axiosClient";
+import DashboardLayout from "../components/DashboardLayout";
 
 function AgentDashboard() {
   const [bins, setBins] = useState([]);
@@ -36,7 +37,7 @@ function AgentDashboard() {
   ).length;
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h1>لوحة التحكم (Agent)</h1>
 
       <div
@@ -78,7 +79,7 @@ function AgentDashboard() {
           إعدادات النظام (threshold)
         </button>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
 

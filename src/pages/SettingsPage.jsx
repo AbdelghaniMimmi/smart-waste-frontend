@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosClient";
+import DashboardLayout from "../components/DashboardLayout";
 
 function SettingsPage() {
   const [threshold, setThreshold] = useState(80);
@@ -51,7 +52,7 @@ function SettingsPage() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h1>إعدادات النظام</h1>
 
       <form onSubmit={handleSave}>
@@ -70,7 +71,7 @@ function SettingsPage() {
       </form>
 
       {message && <p style={{ marginTop: 10 }}>{message}</p>}
-    </div>
+    </DashboardLayout>
   );
 }
 

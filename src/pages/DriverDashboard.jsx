@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosClient";
+import DashboardLayout from "../components/DashboardLayout";
 
 function DriverDashboard() {
   const [routeData, setRouteData] = useState(null);
@@ -26,7 +27,7 @@ function DriverDashboard() {
   const route = routeData?.cheapestInsertion || routeData?.nearestNeighbor;
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h1>لوحة السائق</h1>
 
       <div style={{ marginBottom: 10 }}>
@@ -57,7 +58,7 @@ function DriverDashboard() {
           </ol>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 

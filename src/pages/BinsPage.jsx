@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosClient";
+import DashboardLayout from "../components/DashboardLayout";
 
 function BinsPage() {
   const [bins, setBins] = useState([]);
@@ -22,7 +23,7 @@ function BinsPage() {
   if (loading) return <p>جارِ التحميل...</p>;
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h2>الحاويات</h2>
       <table border="1" cellPadding="6">
         <thead>
@@ -48,7 +49,7 @@ function BinsPage() {
           ))}
         </tbody>
       </table>
-    </div>
+    </DashboardLayout>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosClient";
 import BinsMap from "../components/BinsMap";
+import DashboardLayout from "../components/DashboardLayout";
 
 function MapPage() {
   const [bins, setBins] = useState([]);
@@ -39,7 +40,7 @@ function MapPage() {
       : routeData?.cheapestInsertion;
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h2>خريطة الحاويات والمسار</h2>
 
       <div style={{ marginBottom: 10 }}>
@@ -86,7 +87,7 @@ function MapPage() {
           )}
         </>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 

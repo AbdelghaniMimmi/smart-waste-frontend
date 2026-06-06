@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axiosClient";
+import DashboardLayout from "../components/DashboardLayout";
 
 function RoutePage() {
   const [data, setData] = useState(null);
@@ -19,7 +20,7 @@ function RoutePage() {
   }, []); // أول مرة
 
   return (
-    <div style={{ padding: 20 }}>
+    <DashboardLayout>
       <h2>تحسين مسار الجمع</h2>
 
       <div>
@@ -43,7 +44,7 @@ function RoutePage() {
           <p>ترتيب الحاويات: {data.cheapestInsertion?.order.join(" → ")}</p>
         </>
       )}
-    </div>
+    </DashboardLayout>
   );
 }
 
