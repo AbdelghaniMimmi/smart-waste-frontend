@@ -1,11 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import AgentDashboard from "./pages/AgentDashboard";
-import DriverDashboard from "./pages/DriverDashboard";
+import Dashboard from "./pages/AdminDashboard";
 import BinsPage from "./pages/BinsPage";
 import RoutePage from "./pages/RoutePage";
 import SettingsPage from "./pages/SettingsPage";
+import ProtectedRoute from "./components/ProtectedRoute";
 import MapPage from "./pages/MapPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -16,28 +15,10 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route
-          path="/admin-dashboard"
+          path="/dashboard"
           element={
-            <ProtectedRoute roles={["admin"]}>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/agent-dashboard"
-          element={
-            <ProtectedRoute roles={["agent"]}>
-              <AgentDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/driver-dashboard"
-          element={
-            <ProtectedRoute roles={["driver"]}>
-              <DriverDashboard />
+            <ProtectedRoute roles={["admin", "agent"]}>
+              <Dashboard />
             </ProtectedRoute>
           }
         />
@@ -68,20 +49,24 @@ function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/map"
           element={
             <ProtectedRoute roles={["admin", "agent", "driver"]}>
-              <MapPage />
+               <MapPage />
             </ProtectedRoute>
           }
         />
+
+        {/* صفحة السائق البسيطة يمكن إضافتها لاحقًا */}
+        {/* <Route ... /> */}
 
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
   );
 }
+
+
 
 export default App;
