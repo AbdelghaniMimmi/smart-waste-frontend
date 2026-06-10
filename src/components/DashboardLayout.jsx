@@ -58,6 +58,16 @@ function DashboardLayout({ children }) {
           <button onClick={() => navigate("/map")} style={navButtonStyle}>
             خريطة الحاويات
           </button>
+           {role === "admin" && (
+                <>
+                    <button onClick={() => navigate("/users")} style={navButtonStyle}>
+                       إدارة المستخدمين
+                    </button>
+                    <button onClick={() => navigate("/users/new")} style={navButtonStyle}>
+                       إنشاء مستخدم
+                    </button>
+                </>
+            )}
         </nav>
 
         <button
@@ -66,6 +76,7 @@ function DashboardLayout({ children }) {
         >
           تسجيل الخروج
         </button>
+        
       </aside>
 
       {/* منطقة المحتوى */}
