@@ -13,21 +13,25 @@ function LoginPage() {
     setError("");
 
     try {
+      // طلب تسجيل الدخول إلى الـ backend
       const res = await api.post("/auth/login", { username, password });
       const { token, user } = res.data;
 
+      // تخزين التوكن ومعلومات المستخدم في localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-    // توجيه حسب الدور
+      // توجيه حسب الدور
       if (user.role === "driver") {
         navigate("/driver-dashboard");
       } else if (user.role === "agent") {
         navigate("/agent-dashboard");
       } else {
+        // admin أو أي دور آخر
         navigate("/admin-dashboard");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError("اسم المستخدم أو كلمة السر غير صحيحة");
     }
   };
