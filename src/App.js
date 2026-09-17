@@ -7,9 +7,8 @@ import BinsPage from "./pages/BinsPage";
 import RoutePage from "./pages/RoutePage";
 import SettingsPage from "./pages/SettingsPage";
 import MapPage from "./pages/MapPage";
+import UsersPage from "./pages/UsersPage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import UserCreatePage from "./pages/UserCreatePage";
-import UserListPage from "./pages/UserListPage";
 
 function App() {
   return (
@@ -81,22 +80,14 @@ function App() {
         />
 
         <Route
-          path="/users/new"
+          path="/users"
           element={
             <ProtectedRoute roles={["admin"]}>
-              <UserCreatePage />
+              <UsersPage />
             </ProtectedRoute>
           }
         />
 
-        <Route
-          path="/users"
-          element={
-            <ProtectedRoute roles={["admin"]}>
-              <UserListPage />
-            </ProtectedRoute>
-          }
-        />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </BrowserRouter>
