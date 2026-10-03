@@ -1,22 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import api from "../api/axiosClient";
 import DashboardLayout from "../components/DashboardLayout";
+import BinForm from "../components/BinForm";
 import FillLevel from "../components/FillLevel";
 import Modal from "../components/Modal";
 import {
   AlertIcon,
   CheckIcon,
   DeleteIcon,
+  EditIcon,
   InboxIcon,
   PlusIcon,
   RefreshIcon,
-  TrashBinIcon,
 } from "../components/Icons";
 import { fillTone, formatDateTime } from "../lib/format";
-
-// وسط مدينة وهران، كنقطة انطلاق مألوفة عند إدخال الإحداثيات
-const DEFAULT_LAT = "35.6971";
-const DEFAULT_LNG = "-0.6308";
 
 const STATUS_FILTERS = [
   { key: "all", label: "الكل" },
@@ -39,11 +36,9 @@ function BinsPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
-  const [addOpen, setAddOpen] = useState(false);
-  const [newBinId, setNewBinId] = useState("");
-  const [newLat, setNewLat] = useState(DEFAULT_LAT);
-  const [newLng, setNewLng] = useState(DEFAULT_LNG);
-  const [creating, setCreating] = useState(false);
+  // null: النافذة مغلقة، "new": إضافة، وإلا فهي الحاوية الجاري تعديلها
+  const [formTarget, setFormTarget] = useState(null);
+  const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -69,35 +64,44 @@ function BinsPage() {
     load();
   }, [load]);
 
-  const closeAddModal = () => {
-    setAddOpen(false);
+  const isEditing = formTarget !== null && formTarget !== "new";
+
+  const openAddModal = () => {
     setFormError("");
-    setNewBinId("");
-    setNewLat(DEFAULT_LAT);
-    setNewLng(DEFAULT_LNG);
+    setFormTarget("new");
   };
 
-  const handleCreate = async (e) => {
-    e.preventDefault();
+  const openEditModal = (bin) => {
     setFormError("");
-    setCreating(true);
+    setFormTarget(bin);
+  };
+
+  const closeFormModal = () => {
+    setFormTarget(null);
+    setFormError("");
+  };
+
+  const handleSave = async (payload) => {
+    setFormError("");
+    setSaving(true);
 
     try {
-      await api.post("/bins", {
-        binId: newBinId.trim(),
-        latitude: Number(newLat),
-        longitude: Number(newLng),
-      });
-      setSuccessMessage(`تمت إضافة الحاوية "${newBinId.trim()}" بنجاح`);
-      closeAddModal();
+      if (isEditing) {
+        await api.patch(`/bins/${formTarget._id}`, payload);
+        setSuccessMessage(`تم تحديث الحاوية "${formTarget.binId}" بنجاح`);
+      } else {
+        await api.post("/bins", payload);
+        setSuccessMessage(`تمت إضافة الحاوية "${payload.binId}" بنجاح`);
+      }
+      closeFormModal();
       load();
     } catch (err) {
-      console.error("Error creating bin", err);
+      console.error("Error saving bin", err);
       setFormError(
-        err.response?.data?.message || "حدث خطأ أثناء إضافة الحاوية"
+        err.response?.data?.message || "حدث خطأ أثناء حفظ الحاوية"
       );
     } finally {
-      setCreating(false);
+      setSaving(false);
     }
   };
 
@@ -146,7 +150,7 @@ function BinsPage() {
           </button>
           <button
             className="btn btn--primary btn--sm"
-            onClick={() => setAddOpen(true)}
+            onClick={openAddModal}
           >
             <PlusIcon size={15} />
             إضافة حاوية
@@ -240,7 +244,7 @@ function BinsPage() {
               <button
                 className="btn btn--primary"
                 style={{ marginTop: 14 }}
-                onClick={() => setAddOpen(true)}
+                onClick={openAddModal}
               >
                 <PlusIcon size={16} />
                 إضافة أول حاوية
@@ -266,7 +270,18 @@ function BinsPage() {
                   const tone = fillTone(bin.lastFillLevel);
                   return (
                     <tr key={bin._id}>
-                      <td className="table__id">{bin.binId}</td>
+                      <td className="table__id">
+                        {bin.binId}
+                        {bin.source === "manual" && (
+                          <span
+                            className="badge badge--info"
+                            style={{ marginInlineStart: 8 }}
+                            title="آخر قراءة أُدخلت يدويًا"
+                          >
+                            يدوي
+                          </span>
+                        )}
+                      </td>
                       <td style={{ minWidth: 190 }}>
                         <FillLevel level={bin.lastFillLevel} />
                       </td>
@@ -282,7 +297,7 @@ function BinsPage() {
                           ? `${bin.latitude.toFixed(4)}، ${bin.longitude.toFixed(4)}`
                           : "—"}
                       </td>
-                      <td className="muted">{formatDateTime(bin.updatedAt)}</td>
+                      <td className="muted">{formatDateTime(bin.lastUpdate)}</td>
                       <td>
                         {confirmingId === bin._id ? (
                           <div className="row" style={{ gap: 6 }}>
@@ -305,14 +320,24 @@ function BinsPage() {
                             </button>
                           </div>
                         ) : (
-                          <button
-                            className="btn btn--danger btn--sm"
-                            onClick={() => setConfirmingId(bin._id)}
-                            aria-label={`حذف ${bin.binId}`}
-                          >
-                            <DeleteIcon size={15} />
-                            حذف
-                          </button>
+                          <div className="row" style={{ gap: 6 }}>
+                            <button
+                              className="btn btn--secondary btn--sm"
+                              onClick={() => openEditModal(bin)}
+                              aria-label={`تعديل ${bin.binId}`}
+                            >
+                              <EditIcon size={15} />
+                              تعديل
+                            </button>
+                            <button
+                              className="btn btn--danger btn--sm"
+                              onClick={() => setConfirmingId(bin._id)}
+                              aria-label={`حذف ${bin.binId}`}
+                            >
+                              <DeleteIcon size={15} />
+                              حذف
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -324,98 +349,21 @@ function BinsPage() {
         )}
       </div>
 
-      {addOpen && (
+      {formTarget && (
         <Modal
-          title="إضافة حاوية جديدة"
-          description="تُسجَّل الحاوية بلا قراءات، وتُحدَّث تلقائيًا عند وصول بيانات المستشعر"
-          onClose={closeAddModal}
+          wide
+          title={isEditing ? `تعديل الحاوية ${formTarget.binId}` : "إضافة حاوية جديدة"}
+          description="أدخل البيانات يدويًا، وحدّد الموقع من الخريطة أو من رابط خرائط Google"
+          onClose={closeFormModal}
         >
-          <form className="card__body stack" onSubmit={handleCreate}>
-            <div className="field">
-              <label className="field__label" htmlFor="new-bin-id">
-                رقم الحاوية
-              </label>
-              <div className="input-group">
-                <span className="input-group__icon">
-                  <TrashBinIcon size={18} />
-                </span>
-                <input
-                  id="new-bin-id"
-                  className="input"
-                  type="text"
-                  placeholder="مثال: bin10"
-                  value={newBinId}
-                  onChange={(e) => setNewBinId(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
-              <div className="field">
-                <label className="field__label" htmlFor="new-bin-lat">
-                  خط العرض
-                </label>
-                <input
-                  id="new-bin-lat"
-                  className="input"
-                  type="number"
-                  step="any"
-                  min={-90}
-                  max={90}
-                  value={newLat}
-                  onChange={(e) => setNewLat(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="field">
-                <label className="field__label" htmlFor="new-bin-lng">
-                  خط الطول
-                </label>
-                <input
-                  id="new-bin-lng"
-                  className="input"
-                  type="number"
-                  step="any"
-                  min={-180}
-                  max={180}
-                  value={newLng}
-                  onChange={(e) => setNewLng(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <span className="field__hint">
-              الإحداثيات مطلوبة لعرض الحاوية على الخريطة وإدراجها في مسار الجمع.
-            </span>
-
-            {formError && (
-              <div className="alert alert--danger" role="alert">
-                <AlertIcon size={17} className="alert__icon" />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <div className="modal__footer">
-              <button
-                type="button"
-                className="btn btn--secondary"
-                onClick={closeAddModal}
-              >
-                إلغاء
-              </button>
-              <button
-                type="submit"
-                className="btn btn--primary"
-                disabled={creating}
-              >
-                {creating ? <span className="spinner" /> : <PlusIcon size={17} />}
-                {creating ? "جارٍ الإضافة..." : "إضافة الحاوية"}
-              </button>
-            </div>
-          </form>
+          <BinForm
+            key={isEditing ? formTarget._id : "new"}
+            bin={isEditing ? formTarget : null}
+            submitting={saving}
+            error={formError}
+            onSubmit={handleSave}
+            onCancel={closeFormModal}
+          />
         </Modal>
       )}
     </DashboardLayout>

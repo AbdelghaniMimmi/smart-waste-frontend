@@ -215,3 +215,25 @@ export const WeightIcon = (p) => (
     <path d="M6.5 8h11l2.5 12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1L6.5 8z" />
   </Icon>
 );
+
+export const EditIcon = (p) => (
+  <Icon {...p}>
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+  </Icon>
+);
+
+export const CrosshairIcon = (p) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8" />
+    <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+    <circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none" />
+  </Icon>
+);
+
+export const ExternalLinkIcon = (p) => (
+  <Icon {...p}>
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+    <path d="M15 3h6v6M10 14 21 3" />
+  </Icon>
+);

@@ -1,8 +1,11 @@
 import { useEffect, useRef } from "react";
 
-function Modal({ title, description, onClose, children }) {
+function Modal({ title, description, onClose, wide = false, children }) {
   const dialogRef = useRef(null);
   const previouslyFocused = useRef(null);
+  // نحتفظ بآخر onClose في ref حتى لا يُعاد تشغيل التأثير (وإعادة التركيز) عند كل إعادة رسم
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     previouslyFocused.current = document.activeElement;
@@ -10,12 +13,14 @@ function Modal({ title, description, onClose, children }) {
     // الحقل الأول أولى بالتركيز من زر الإغلاق الذي يسبقه في البنية
     const dialog = dialogRef.current;
     const target =
-      dialog?.querySelector("input, select, textarea") ||
+      dialog?.querySelector(
+        "input:not([disabled]), select:not([disabled]), textarea:not([disabled])"
+      ) ||
       dialog?.querySelector("button");
     target?.focus();
 
     const onKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKeyDown);
 
@@ -23,12 +28,12 @@ function Modal({ title, description, onClose, children }) {
       document.removeEventListener("keydown", onKeyDown);
       previouslyFocused.current?.focus?.();
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div className="modal__backdrop" onMouseDown={onClose}>
       <div
-        className="modal"
+        className={`modal${wide ? " modal--wide" : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
