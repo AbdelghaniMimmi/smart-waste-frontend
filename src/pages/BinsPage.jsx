@@ -6,6 +6,7 @@ import Modal from "../components/Modal";
 import {
   AlertIcon,
   CheckIcon,
+  DeleteIcon,
   InboxIcon,
   PlusIcon,
   RefreshIcon,
@@ -45,6 +46,10 @@ function BinsPage() {
   const [creating, setCreating] = useState(false);
   const [formError, setFormError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+
+  const [confirmingId, setConfirmingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -96,6 +101,24 @@ function BinsPage() {
     }
   };
 
+  const handleDelete = async (bin) => {
+    setDeleteError("");
+    setDeletingId(bin._id);
+    try {
+      await api.delete(`/bins/${bin._id}`);
+      setBins((prev) => prev.filter((b) => b._id !== bin._id));
+      setConfirmingId(null);
+      setSuccessMessage(`تم حذف الحاوية "${bin.binId}" بنجاح`);
+    } catch (err) {
+      console.error("Error deleting bin", err);
+      setDeleteError(
+        err.response?.data?.message || "حدث خطأ أثناء حذف الحاوية"
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
     return bins.filter((bin) => {
@@ -139,6 +162,17 @@ function BinsPage() {
         >
           <CheckIcon size={17} className="alert__icon" />
           <span>{successMessage}</span>
+        </div>
+      )}
+
+      {deleteError && (
+        <div
+          className="alert alert--danger"
+          role="alert"
+          style={{ marginBottom: 16 }}
+        >
+          <AlertIcon size={17} className="alert__icon" />
+          <span>{deleteError}</span>
         </div>
       )}
 
@@ -224,6 +258,7 @@ function BinsPage() {
                   <th>الوزن (كغ)</th>
                   <th>الإحداثيات</th>
                   <th>آخر تحديث</th>
+                  <th>إجراءات</th>
                 </tr>
               </thead>
               <tbody>
@@ -248,6 +283,38 @@ function BinsPage() {
                           : "—"}
                       </td>
                       <td className="muted">{formatDateTime(bin.updatedAt)}</td>
+                      <td>
+                        {confirmingId === bin._id ? (
+                          <div className="row" style={{ gap: 6 }}>
+                            <button
+                              className="btn btn--danger btn--sm"
+                              onClick={() => handleDelete(bin)}
+                              disabled={deletingId === bin._id}
+                            >
+                              {deletingId === bin._id ? (
+                                <span className="spinner" />
+                              ) : null}
+                              تأكيد الحذف
+                            </button>
+                            <button
+                              className="btn btn--ghost btn--sm"
+                              onClick={() => setConfirmingId(null)}
+                              disabled={deletingId === bin._id}
+                            >
+                              إلغاء
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            className="btn btn--danger btn--sm"
+                            onClick={() => setConfirmingId(bin._id)}
+                            aria-label={`حذف ${bin.binId}`}
+                          >
+                            <DeleteIcon size={15} />
+                            حذف
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
